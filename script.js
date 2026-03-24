@@ -85,7 +85,7 @@ let mascotTimeout;
 function makeMascotTalk() {
     const container = document.getElementById('mascot');
     const speech = document.getElementById('speech');
-    const texts = ["พร้อมลุยแล้วเจ้านาย! 🦇", "เสร็จฉันล่ะ! 🖤", "ก๊อปไปเลยสิ รออะไรอยู่~ 🎀", "น่ารักใช่มั้ยล่ะ? ✨", "อย่ามาคลิกฉันเล่นนะ! 💀"];
+    const texts = ["พ่อมึงตาย", "แม่มึงตาย", "ไอหน้าหี", "อีจังไร", "ไปตาย"];
     speech.innerText = texts[Math.floor(Math.random() * texts.length)];
     container.classList.add('talk');
     clearTimeout(mascotTimeout);
@@ -162,7 +162,7 @@ function copyToClipboard(text, btnElement, codeBoxId) {
     navigator.clipboard.writeText(text).then(() => {
         const codeBox = document.getElementById(codeBoxId); const originalHtml = btnElement.innerHTML;
         codeBox.classList.remove('flash'); void codeBox.offsetWidth; codeBox.classList.add('flash');
-        btnElement.innerHTML = `<i class="ph-bold ph-check"></i> <span>ก๊อปปี้แล้ว! 💜</span>`;
+        btnElement.innerHTML = `<i class="ph-bold ph-check"></i> <span>คัดลอกแล้ว</span>`;
         btnElement.style.background = 'var(--text-main)'; btnElement.style.color = 'var(--bg-base)';
         const toast = document.getElementById('toast'); toast.classList.add('show');
         setTimeout(() => {
