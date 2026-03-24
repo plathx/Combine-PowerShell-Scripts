@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light">
+    <div class="bg-grid"></div>
+    <div id="cursor-glow"></div>
+
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="ph-fill ph-moon-stars"></i>
+            <span>Combine PowerShell Scripts</span>
+        </div>
+        <div class="menu-list" id="menu-list"></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <div class="header-title-wrapper">
+                <h1 id="category-title">รายการทั้งหมด</h1>
+                <span id="item-count"></span>
+            </div>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="ph ph-magnifying-glass"></i>
+                    <input type="text" class="search-input" id="search-input" placeholder="ค้นหาสคริปต์...">
+                </div>
+                <a href="https://github.com/plathx" target="_blank" class="action-btn github-btn">
+                    <i class="ph-bold ph-github-logo"></i>
+                </a>
+                <button id="theme-toggle" class="action-btn theme-btn">
+                    <i class="ph-bold ph-moon"></i>
+                </button>
+            </div>
+        </header>
+        <section class="content-area" id="content-scroll">
+            <div class="grid" id="card-grid"></div>
+        </section>
+    </main>
+
+    <div class="toast" id="toast">
+        <i class="ph-fill ph-heart"></i>
+        <span>คัดลอกคำสั่งเรียบร้อยแล้ว! 💜</span>
+    </div>
+
+    <div class="mascot-container" id="mascot" onclick="makeMascotTalk()">
+        <div class="speech-bubble" id="speech">มีอะไรให้ช่วยไหม? 🦇</div>
+        <svg class="mascot" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 25,65 L 5,20 L 40,45 Z" fill="#2D1B2E" stroke="#F472B6" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M 75,65 L 95,20 L 60,45 Z" fill="#2D1B2E" stroke="#F472B6" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="5" cy="20" r="7" fill="#F472B6"/>
+            <circle cx="95" cy="20" r="7" fill="#F472B6"/>
+            <ellipse cx="50" cy="65" rx="42" ry="32" fill="#2D1B2E"/>
+            <ellipse cx="50" cy="70" rx="35" ry="25" fill="white"/>
+            <path d="M 40,85 Q 50,88 60,85" fill="none" stroke="#2D1B2E" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 28,68 Q 33,62 38,68" fill="none" stroke="#2D1B2E" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 72,68 Q 67,62 62,68" fill="none" stroke="#2D1B2E" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="50" cy="76" r="3" fill="#F472B6"/>
+            <ellipse cx="25" cy="76" rx="6" ry="3" fill="#F472B6" opacity="0.6"/>
+            <ellipse cx="75" cy="76" rx="6" ry="3" fill="#F472B6" opacity="0.6"/>
+            <path d="M 40,42 L 60,42 L 65,52 L 50,56 L 35,52 Z" fill="#F472B6"/>
+            <circle cx="45" cy="48" r="2" fill="#2D1B2E"/>
+            <circle cx="55" cy="48" r="2" fill="#2D1B2E"/>
+        </svg>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
