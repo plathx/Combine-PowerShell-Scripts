@@ -178,7 +178,13 @@ function changeCategory(id, name) {
         renderMenu(); 
         renderCards();
         grid.classList.remove('fade-out');
-        document.getElementById('content-scroll').scrollTo({ top: 0, behavior: 'smooth' });
+        const scroller = document.querySelector('.main-content') || document.getElementById('content-scroll');
+        if(scroller) scroller.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        if (window.innerWidth <= 900) {
+            document.getElementById('sidebar')?.classList.remove('open');
+            document.getElementById('mobile-overlay')?.classList.remove('show');
+        }
     }, 150);
 }
 
@@ -294,3 +300,34 @@ function copyToClipboard(text, btnElement, codeBoxId) {
 
 renderMenu(); 
 renderCards();
+
+// Mobile Menu Logic
+const menuBtn = document.getElementById('menu-btn');
+const sidebar = document.getElementById('sidebar');
+const mobileOverlay = document.getElementById('mobile-overlay');
+
+function toggleMobileMenu() {
+    if(sidebar) sidebar.classList.toggle('open');
+    if(mobileOverlay) mobileOverlay.classList.toggle('show');
+}
+
+if (menuBtn) {
+    menuBtn.addEventListener('click', toggleMobileMenu);
+}
+if (mobileOverlay) {
+    mobileOverlay.addEventListener('click', toggleMobileMenu);
+}
+
+// Sticky Header Scroll Effect
+const mainContentScroller = document.querySelector('.main-content');
+const mainHeader = document.getElementById('header');
+
+if (mainContentScroller && mainHeader) {
+    mainContentScroller.addEventListener('scroll', () => {
+        if (mainContentScroller.scrollTop > 30) {
+            mainHeader.classList.add('scrolled');
+        } else {
+            mainHeader.classList.remove('scrolled');
+        }
+    });
+}
