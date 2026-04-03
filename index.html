@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PowerShell Scripts Collection</title>
+    <title>PowerShell</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bungee+Spice&display=swap" rel="stylesheet">
@@ -65,11 +65,12 @@
         </div>
     </div>
     <div id="cursor-glow"></div>
+    <div id="mobile-overlay" class="mobile-overlay"></div>
 
     <aside class="sidebar" id="sidebar">
         <div class="logo anim-item">
             <i class="ph-fill ph-moon-stars"></i>
-            <span>PowerShell Hub</span>
+            <span>Combine PowerShell Scripts</span>
         </div>
         <div class="menu-list anim-item" id="menu-list"></div>
     </aside>
@@ -90,6 +91,9 @@
                 </a>
                 <button id="theme-toggle" class="action-btn theme-btn anim-item" style="--anim-delay: 0.5s;">
                     <i class="ph-bold ph-moon"></i>
+                </button>
+                <button id="menu-btn" class="action-btn menu-btn anim-item mobile-only" style="--anim-delay: 0.6s;">
+                    <i class="ph-bold ph-list"></i>
                 </button>
             </div>
         </header>
