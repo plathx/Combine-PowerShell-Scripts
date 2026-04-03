@@ -70,7 +70,7 @@
     <aside class="sidebar" id="sidebar">
         <div class="logo anim-item">
             <i class="ph-fill ph-moon-stars"></i>
-            <span>Combine PowerShell Scripts</span>
+            <span>PowerShell Hub</span>
         </div>
         <div class="menu-list anim-item" id="menu-list"></div>
     </aside>
@@ -78,23 +78,27 @@
     <main class="main-content">
         <header class="header" id="header">
             <div class="header-title-wrapper anim-item">
-                <h1 id="category-title">รายการทั้งหมด</h1>
+                <h1 class="coding-title" id="typewriter-h1">
+                    <span id="category-title"></span><span class="typewriter-cursor">|</span>
+                </h1>
                 <span id="item-count"></span>
             </div>
-            <div class="header-actions">
+            <div class="header-right">
                 <div class="search-box anim-item" style="--anim-delay: 0.3s;">
-                    <i class="ph ph-magnifying-glass"></i>
                     <input type="text" class="search-input" id="search-input" placeholder="ค้นหาสคริปต์...">
+                    <button class="search-btn"><i class="ph-bold ph-magnifying-glass"></i></button>
                 </div>
-                <a href="https://github.com/phwyverysad" target="_blank" class="action-btn github-btn anim-item" style="--anim-delay: 0.4s;">
-                    <i class="ph-bold ph-github-logo"></i>
-                </a>
-                <button id="theme-toggle" class="action-btn theme-btn anim-item" style="--anim-delay: 0.5s;">
-                    <i class="ph-bold ph-moon"></i>
-                </button>
-                <button id="menu-btn" class="action-btn menu-btn anim-item mobile-only" style="--anim-delay: 0.6s;">
-                    <i class="ph-bold ph-list"></i>
-                </button>
+                <div class="action-dock anim-item" style="--anim-delay: 0.4s;">
+                    <a href="https://github.com/phwyverysad" target="_blank" class="action-btn github-btn">
+                        <i class="ph-bold ph-github-logo"></i>
+                    </a>
+                    <button id="theme-toggle" class="action-btn theme-btn">
+                        <i class="ph-bold ph-moon"></i>
+                    </button>
+                    <button id="menu-btn" class="action-btn menu-btn">
+                        <i class="ph-bold ph-list"></i>
+                    </button>
+                </div>
             </div>
         </header>
         <section class="content-area" id="content-scroll">
