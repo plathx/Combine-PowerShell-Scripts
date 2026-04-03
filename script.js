@@ -3,6 +3,13 @@ window.addEventListener('load', () => {
         document.getElementById('page-loader').classList.add('hidden');
         setTimeout(() => {
             document.body.classList.add('loaded');
+            // Wait slightly after fade in before typing starts
+            setTimeout(() => {
+                const titleEl = document.getElementById('category-title');
+                if (titleEl && titleEl.innerText === "") {
+                    typeTitle('category-title', "หน้าแรก (ทั้งหมด)");
+                }
+            }, 400);
         }, 100);
     }, 600);
 });
@@ -151,6 +158,35 @@ function renderMenu() {
     
     menuList.innerHTML = menuHtml;
 }
+let typeWriterTimeout;
+function typeTitle(textWrapperId, newText) {
+    const el = document.getElementById(textWrapperId);
+    const cursorEl = document.querySelector('.typewriter-cursor');
+    if (!el) return;
+    
+    clearTimeout(typeWriterTimeout);
+    el.innerText = "";
+    if (cursorEl) {
+        cursorEl.classList.remove('typing-done');
+    }
+    
+    let i = 0;
+    
+    function typeNext() {
+        if (i < newText.length) {
+            el.innerText += newText.charAt(i);
+            i++;
+            typeWriterTimeout = setTimeout(typeNext, Math.random() * 30 + 40); 
+        } else {
+            if (cursorEl) {
+                setTimeout(() => {
+                    cursorEl.classList.add('typing-done');
+                }, 2000);
+            }
+        }
+    }
+    typeNext();
+}
 
 function changeCategory(id, name) {
     if (currentCategory === id && searchTerm === "") return; 
@@ -167,13 +203,10 @@ function changeCategory(id, name) {
     grid.classList.add('fade-out');
     
     setTimeout(() => {
-        titleEl.innerText = name; 
-        titleEl.style.transform = 'translateY(10px)';
+        titleEl.style.transform = 'translateY(0)'; 
+        titleEl.style.opacity = '1'; 
         
-        setTimeout(() => { 
-            titleEl.style.transform = 'translateY(0)'; 
-            titleEl.style.opacity = '1'; 
-        }, 30);
+        typeTitle('category-title', name);
         
         renderMenu(); 
         renderCards();
@@ -194,7 +227,7 @@ document.getElementById('search-input').addEventListener('input', (e) => {
     searchTimeout = setTimeout(() => {
         searchTerm = e.target.value.toLowerCase(); 
         if(searchTerm !== "") {
-            document.getElementById('category-title').innerText = `ผลการค้นหา: "${e.target.value}"`;
+            typeTitle('category-title', `การค้นหา: ${e.target.value}`);
             currentCategory = "Search"; 
             renderMenu();
         } else {
@@ -316,6 +349,23 @@ if (menuBtn) {
 }
 if (mobileOverlay) {
     mobileOverlay.addEventListener('click', toggleMobileMenu);
+}
+
+// Edge hover logic (Desktop)
+document.addEventListener('mousemove', (e) => {
+    if (window.innerWidth > 900) {
+        if (e.clientX <= 15 && sidebar && !sidebar.classList.contains('open')) {
+            toggleMobileMenu();
+        }
+    }
+});
+
+if (sidebar) {
+    sidebar.addEventListener('mouseleave', () => {
+        if (window.innerWidth > 900 && sidebar.classList.contains('open')) {
+            toggleMobileMenu();
+        }
+    });
 }
 
 // Sticky Header Scroll Effect
