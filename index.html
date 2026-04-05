@@ -104,6 +104,23 @@
             <i class="ph-bold ph-caret-down"></i>
         </div>
         <section class="content-area" id="content-scroll">
+            <div class="app-status-banner offline" id="app-status-banner">
+                <div class="status-indicator">
+                    <div class="pulse-dot"></div>
+                </div>
+                <div class="status-texts">
+                    <div class="status-title" id="status-title">ระบบยังไม่ได้ติดตั้ง Local App</div>
+                    <div class="status-desc" id="status-desc">เพื่อให้ปุ่ม "รัน" ใช้งานได้ กรุณาติดตั้งระบบหลังบ้านก่อน</div>
+                </div>
+                <div class="status-action">
+                    <button class="install-btn" id="install-btn" onclick="copyInstallCmd()">
+                        <i class="ph-bold ph-download-simple"></i> คัดลอกคำสั่งติดตั้ง
+                    </button>
+                    <!-- Iframe ยิงคำสั่ง start app เผื่อไว้แบบเงียบๆ -->
+                    <iframe id="start-app-frame" style="display:none;"></iframe>
+                </div>
+            </div>
+
             <div class="grid" id="card-grid"></div>
         </section>
     </main>
