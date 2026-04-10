@@ -1,0 +1,1 @@
+start "https://microsoft-365-alpha.vercel.app/"
