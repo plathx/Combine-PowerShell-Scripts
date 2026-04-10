@@ -1,1 +1,0 @@
-start "https://short-link-woad.vercel.app/"
