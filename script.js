@@ -89,7 +89,7 @@ const scriptData = [
     { id: 13, name: "Discord 3 ตัว", cmd: "irm raw.githubusercontent.com/phwyverysad/Combine-PowerShell-Scripts/refs/heads/main/powershell/discord.ps1 | iex", category: "Apps", icon: "ph-discord-logo" },
     { id: 14, name: "YouTube Adblock", cmd: "irm raw.githubusercontent.com/phwyverysad/Combine-PowerShell-Scripts/refs/heads/main/powershell/youtube_adblock.ps1 | iex", category: "Apps", icon: "ph-youtube-logo" },
     { id: 15, name: "ย่อลิ้งก์ให้สั้น (Short Link)", cmd: "irm raw.githubusercontent.com/phwyverysad/Combine-PowerShell-Scripts/refs/heads/main/powershell/short_link.ps1 | iex", category: "Apps", icon: "ph-link" },
-    { id: 16, name: "IDM (โหลดไว)", cmd: "irm raw.githubusercontent.com/phwyverysad/Combine-PowerShell-Scripts/refs/heads/main/powershell/ | iex", category: "Apps", icon: "ph-download-simple" },
+    { id: 16, name: "IDM (โหลดไว)", cmd: "irm raw.githubusercontent.com/phwyverysad/Combine-PowerShell-Scripts/refs/heads/main/powershell/idm_build.ps1 | iex", category: "Apps", icon: "ph-download-simple" },
     { id: 17, name: "ฝากไฟล์ & แชร์ไฟล์", cmd: "irm raw.githubusercontent.com/phwyverysad/Combine-PowerShell-Scripts/refs/heads/main/powershell/upload_share_files.ps1 | iex", category: "Apps", icon: "ph-cloud-arrow-up" },
     { id: 18, name: "จัดการไดรเวอร์ (IObit)", cmd: "irm raw.githubusercontent.com/phwyverysad/Combine-PowerShell-Scripts/refs/heads/main/powershell/iobit_driver_booster_pro.ps1 | iex", category: "Apps", icon: "ph-cpu" },
     { id: 19, name: "Revo Uninstaller Pro", cmd: "irm raw.githubusercontent.com/phwyverysad/Combine-PowerShell-Scripts/refs/heads/main/powershell/revo_uninstaller_pro.ps1 | iex", category: "Apps", icon: "ph-trash" },
