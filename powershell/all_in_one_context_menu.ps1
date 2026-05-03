@@ -9,20 +9,53 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
 # =======================================================================
 # Function to execute raw Batch code perfectly without modifying it
 # =======================================================================
+function Show-ProgressBar {
+    param([int]$Percent, [string]$Status, [int]$BarWidth = 40)
+    
+    $filled = [math]::Floor($BarWidth * $Percent / 100)
+    $empty = $BarWidth - $filled
+    $bar = "[" + ("=" * $filled) + (" " * $empty) + "]"
+    $percentStr = "{0,3}%" -f $Percent
+    
+    Write-Host "`r  $bar $percentStr $Status" -NoNewline -ForegroundColor Cyan
+}
+
 function Run-BatchPayload {
     param([string]$BatCode, [string]$Title)
     
-    Write-Host "==================================================" -ForegroundColor Cyan
-    Write-Host "  $Title" -ForegroundColor Yellow
-    Write-Host "==================================================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  ╔════════════════════════════════════════════════╗" -ForegroundColor Cyan
+    Write-Host "  ║  $Title" -ForegroundColor Yellow -NoNewline
+    Write-Host "$(' ' * (43 - $Title.Length))" -NoNewline
+    Write-Host "║" -ForegroundColor Cyan
+    Write-Host "  ╚════════════════════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host ""
 
     $tempBat = Join-Path $env:TEMP "Setup_Payload_$([guid]::NewGuid()).bat"
     
     # Save as UTF-8 (Support Thai characters in Smart 7-zip script)
-    [System.IO.File]::WriteAllText($tempBat, "@echo off`r`n$BatCode", [System.Text.Encoding]::UTF8)
+    [System.IO.File]::WriteAllText($tempBat, "@echo off`r`nsetlocal enabledelayedexpansion`r`n$BatCode", [System.Text.Encoding]::UTF8)
     
-    # Run the bat file
-    $process = Start-Process "cmd.exe" -ArgumentList "/c `"$tempBat`"" -Wait -NoNewWindow -PassThru
+    # Create progress simulation
+    $steps = @("Initializing...", "Processing...", "Configuring...", "Finalizing...")
+    $stepIndex = 0
+    $progress = 0
+    
+    # Run the bat file in background
+    $process = Start-Process "cmd.exe" -ArgumentList "/c `"$tempBat`"" -WindowStyle Hidden -PassThru
+    
+    # Show progress bar while process is running
+    while (-not $process.HasExited) {
+        Start-Sleep -Milliseconds 200
+        $progress += 2
+        if ($progress -gt 95) { $progress = 95 }
+        if ($progress % 25 -eq 0 -and $stepIndex -lt $steps.Count - 1) { $stepIndex++ }
+        Show-ProgressBar -Percent $progress -Status $steps[$stepIndex]
+    }
+    
+    # Complete progress
+    Show-ProgressBar -Percent 100 -Status "Complete!"
+    Write-Host "" # New line
     
     # Cleanup
     Remove-Item -Path $tempBat -Force -ErrorAction SilentlyContinue
@@ -113,36 +146,53 @@ echo --------------------------------------------------
 $Install_Gofile = @'
 set "SCRIPT_PATH=C:\GofileScript"
 set "PS_FILE=%SCRIPT_PATH%\upload_to_gofile.ps1"
+set "VBS_FILE=%SCRIPT_PATH%\upload_to_gofile.vbs"
 if not exist "%SCRIPT_PATH%" mkdir "%SCRIPT_PATH%"
 
-echo [1/2] Creating PowerShell script...
+echo [1/3] Creating PowerShell script...
 echo $filePath = $args[0] > "%PS_FILE%"
 echo if (-not $filePath) { exit } >> "%PS_FILE%"
 echo try { >> "%PS_FILE%"
-echo     Write-Host "Connecting to Gofile..." -ForegroundColor Cyan >> "%PS_FILE%"
+echo     [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] ^| Out-Null >> "%PS_FILE%"
+echo     [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] ^| Out-Null >> "%PS_FILE%"
 echo     $serverInfo = Invoke-RestMethod -Uri "https://api.gofile.io/servers" >> "%PS_FILE%"
 echo     $server = $serverInfo.data.servers[0].name >> "%PS_FILE%"
-echo     Write-Host "Uploading..." -ForegroundColor Yellow >> "%PS_FILE%"
+echo     $fileItem = Get-Item $filePath >> "%PS_FILE%"
+echo     $fileSize = [math]::Round($fileItem.Length / 1MB, 2) >> "%PS_FILE%"
+echo     $fileName = $fileItem.Name >> "%PS_FILE%"
 echo     $uploadResponse = curl.exe -s -F "file=@$filePath" "https://$server.gofile.io/contents/uploadfile" >> "%PS_FILE%"
 echo     $response = $uploadResponse ^| ConvertFrom-Json >> "%PS_FILE%"
 echo     if ($response.status -eq "ok") { >> "%PS_FILE%"
 echo         $link = $response.data.downloadPage >> "%PS_FILE%"
 echo         $link ^| Set-Clipboard >> "%PS_FILE%"
-echo         Write-Host "--------------------------------" -ForegroundColor Gray >> "%PS_FILE%"
-echo         Write-Host "SUCCESS: $link" -ForegroundColor Green >> "%PS_FILE%"
-echo         Write-Host "Link copied to clipboard." >> "%PS_FILE%"
-echo         Add-Type -AssemblyName System.Windows.Forms >> "%PS_FILE%"
-echo         [System.Windows.Forms.MessageBox]::Show("Upload Finished!`n`nLink: $link", "Gofile") >> "%PS_FILE%"
-echo     } else { Write-Host "Upload Failed!" -ForegroundColor Red } >> "%PS_FILE%"
-echo } catch { Write-Host "Error: $_" -ForegroundColor Red } >> "%PS_FILE%"
-echo Write-Host "Press any key to close..." >> "%PS_FILE%"
-echo $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown") >> "%PS_FILE%"
+echo         $xmlString = @" >> "%PS_FILE%"
+echo ^<toast^>^<visual^>^<binding template="ToastGeneric"^>^<text^>Gofile Upload Complete!^</text^>^<text^>File: $fileName ($fileSize MB)^</text^>^<text^>Link copied to clipboard: $link^</text^>^<text placement="attribution"^>Gofile Upload Service^</text^>^</binding^>^</visual^>^</toast^> >> "%PS_FILE%"
+echo "@ >> "%PS_FILE%"
+echo         $toastXml = [Windows.Data.Xml.Dom.XmlDocument]::new() >> "%PS_FILE%"
+echo         $toastXml.LoadXml($xmlString) >> "%PS_FILE%"
+echo         $toast = [Windows.UI.Notifications.ToastNotification]::new($toastXml) >> "%PS_FILE%"
+echo         $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("GofileUpload") >> "%PS_FILE%"
+echo         $notifier.Show($toast) >> "%PS_FILE%"
+echo     } else { >> "%PS_FILE%"
+echo         $xmlString = "^<toast^>^<visual^>^<binding template=\"ToastGeneric\"^>^<text^>Gofile Upload Failed!^</text^>^<text^>Please try again later.^</text^>^</binding^>^</visual^>^</toast^>" >> "%PS_FILE%"
+echo         $toastXml = [Windows.Data.Xml.Dom.XmlDocument]::new() >> "%PS_FILE%"
+echo         $toastXml.LoadXml($xmlString) >> "%PS_FILE%"
+echo         $toast = [Windows.UI.Notifications.ToastNotification]::new($toastXml) >> "%PS_FILE%"
+echo         $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("GofileUpload") >> "%PS_FILE%"
+echo         $notifier.Show($toast) >> "%PS_FILE%"
+echo     } >> "%PS_FILE%"
+echo } catch { } >> "%PS_FILE%"
 
-echo [2/2] Updating Registry...
+echo [2/3] Creating VBS wrapper...
+echo Set WshShell = CreateObject("WScript.Shell") ^> "%VBS_FILE%"
+echo WshShell.Run "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File ""%PS_FILE%"" ""%%1""", 0, False ^>^> "%VBS_FILE%"
+echo Set WshShell = Nothing ^>^> "%VBS_FILE%"
+
+echo [3/3] Updating Registry...
 reg delete "HKEY_CLASSES_ROOT\*\shell\GofileUpload" /f >nul 2>&1
 reg add "HKEY_CLASSES_ROOT\*\shell\GofileUpload" /ve /t REG_SZ /d "Get Gofile Link" /f >nul
 reg add "HKEY_CLASSES_ROOT\*\shell\GofileUpload" /v "Icon" /t REG_SZ /d "imageres.dll,-1024" /f >nul
-reg add "HKEY_CLASSES_ROOT\*\shell\GofileUpload\command" /ve /t REG_SZ /d "powershell.exe -ExecutionPolicy Bypass -File \"%PS_FILE%\" \"%%1\"" /f >nul
+reg add "HKEY_CLASSES_ROOT\*\shell\GofileUpload\command" /ve /t REG_SZ /d "wscript.exe \"%VBS_FILE%\" \"%%1\"" /f >nul
 
 echo --------------------------------------------------
 echo DONE! Setup completed successfully.
@@ -320,8 +370,7 @@ exit /b
 $Install_ClearMemory = @'
 set "TASK_FOLDER=C:\ProgramData\ClearMemoryTask"
 set "PS_FILE=%TASK_FOLDER%\ClearMemory.ps1"
-
-echo [OK] Creating task folder...
+set "VBS_FILE=%TASK_FOLDER%\ClearMemory.vbs"
 if not exist "%TASK_FOLDER%" mkdir "%TASK_FOLDER%"
 
 echo [OK] Creating PowerShell script...
@@ -353,12 +402,15 @@ echo [OK] Creating PowerShell script...
 >> "%PS_FILE%" echo $toastXml = [Windows.Data.Xml.Dom.XmlDocument]::new()
 >> "%PS_FILE%" echo $toastXml.LoadXml($xmlString)
 >> "%PS_FILE%" echo $toast = [Windows.UI.Notifications.ToastNotification]::new($toastXml)
->> "%PS_FILE%" echo $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("PowerShell")
+>> "%PS_FILE%" echo $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("ClearMemory")
 >> "%PS_FILE%" echo $notifier.Show($toast)
 
-echo [OK] Adding registry entries...
-set "CMD_ARGS=powershell.exe -WindowStyle Hidden -Command ""Start-Process powershell.exe -ArgumentList '-WindowStyle Hidden -ExecutionPolicy Bypass -File \"%PS_FILE%\"' -Verb RunAs"""
+echo [OK] Creating VBS wrapper...
+echo Set UAC = CreateObject("Shell.Application") ^> "%VBS_FILE%"
+echo UAC.ShellExecute "powershell.exe", "-WindowStyle Hidden -ExecutionPolicy Bypass -File ""%PS_FILE%""", "", "runas", 0 ^>^> "%VBS_FILE%"
+echo Set UAC = Nothing ^>^> "%VBS_FILE%"
 
+echo [OK] Adding registry entries...
 reg delete "HKEY_CLASSES_ROOT\Directory\Background\shell\ClearMemoryCommand" /f >nul 2>&1
 reg delete "HKEY_CLASSES_ROOT\Directory\shell\ClearMemoryCommand" /f >nul 2>&1
 reg delete "HKEY_CLASSES_ROOT\Drive\shell\ClearMemoryCommand" /f >nul 2>&1
@@ -366,17 +418,17 @@ reg delete "HKEY_CLASSES_ROOT\Drive\shell\ClearMemoryCommand" /f >nul 2>&1
 reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\ClearMemoryCommand" /ve /t REG_SZ /d "Clear Memory (Standby List)" /f >nul
 reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\ClearMemoryCommand" /v "Icon" /t REG_SZ /d "C:\Windows\System32\cmd.exe" /f >nul
 reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\ClearMemoryCommand" /v "HasLUAShield" /t REG_SZ /d "" /f >nul
-reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\ClearMemoryCommand\command" /ve /t REG_SZ /d "%CMD_ARGS%" /f >nul
+reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\ClearMemoryCommand\command" /ve /t REG_SZ /d "wscript.exe ""%VBS_FILE%""" /f >nul
 
 reg add "HKEY_CLASSES_ROOT\Directory\shell\ClearMemoryCommand" /ve /t REG_SZ /d "Clear Memory (Standby List)" /f >nul
 reg add "HKEY_CLASSES_ROOT\Directory\shell\ClearMemoryCommand" /v "Icon" /t REG_SZ /d "C:\Windows\System32\cmd.exe" /f >nul
 reg add "HKEY_CLASSES_ROOT\Directory\shell\ClearMemoryCommand" /v "HasLUAShield" /t REG_SZ /d "" /f >nul
-reg add "HKEY_CLASSES_ROOT\Directory\shell\ClearMemoryCommand\command" /ve /t REG_SZ /d "%CMD_ARGS%" /f >nul
+reg add "HKEY_CLASSES_ROOT\Directory\shell\ClearMemoryCommand\command" /ve /t REG_SZ /d "wscript.exe ""%VBS_FILE%""" /f >nul
 
 reg add "HKEY_CLASSES_ROOT\Drive\shell\ClearMemoryCommand" /ve /t REG_SZ /d "Clear Memory (Standby List)" /f >nul
 reg add "HKEY_CLASSES_ROOT\Drive\shell\ClearMemoryCommand" /v "Icon" /t REG_SZ /d "C:\Windows\System32\cmd.exe" /f >nul
 reg add "HKEY_CLASSES_ROOT\Drive\shell\ClearMemoryCommand" /v "HasLUAShield" /t REG_SZ /d "" /f >nul
-reg add "HKEY_CLASSES_ROOT\Drive\shell\ClearMemoryCommand\command" /ve /t REG_SZ /d "%CMD_ARGS%" /f >nul
+reg add "HKEY_CLASSES_ROOT\Drive\shell\ClearMemoryCommand\command" /ve /t REG_SZ /d "wscript.exe ""%VBS_FILE%""" /f >nul
 
 ie4uinit.exe -show >nul 2>&1
 
@@ -394,6 +446,7 @@ reg delete "HKEY_CLASSES_ROOT\Drive\shell\ClearMemoryCommand" /f >nul 2>&1
 echo [OK] Removing script files...
 set "TASK_FOLDER=C:\ProgramData\ClearMemoryTask"
 if exist "%TASK_FOLDER%\ClearMemory.ps1" del "%TASK_FOLDER%\ClearMemory.ps1" /f /q
+if exist "%TASK_FOLDER%\ClearMemory.vbs" del "%TASK_FOLDER%\ClearMemory.vbs" /f /q
 if exist "%TASK_FOLDER%" rd "%TASK_FOLDER%" 2>nul
 
 ie4uinit.exe -show >nul 2>&1
